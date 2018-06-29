@@ -7,4 +7,4 @@ set -ex
 /usr/local/bin/wrapdocker &
 
 # start the ssh daemon
-/usr/sbin/sshd -D
+setup-sshd "${@}"

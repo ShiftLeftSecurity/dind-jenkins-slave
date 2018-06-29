@@ -1,19 +1,38 @@
-# dind-jenkins-slave
+# ShiftLeft dind-jenkins-slave
 
 A Docker image which allows for running Docker in Docker (DinD). This image is meant to be used with the [Jenkins Docker plugin](https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin). It allows for Docker containers used as Jenkins build slaves to create and publish their own Docker images in-turn.
 
-This is a mashup of "[evarga/jenkins-slave](https://registry.hub.docker.com/u/evarga/jenkins-slave/)" and "[jpetazzo/dind](https://registry.hub.docker.com/u/jpetazzo/dind/)".
+This is a mashup of
+
+* [jenkins/ssh-slave](https://registry.hub.docker.com/u/jenkins/ssh-slave/)
+* [tehranian/dind-jenkins-slave](https://registry.hub.docker.com/u/tehranian/dind-jenkins-slave/)
+* [evarga/jenkins-slave](https://registry.hub.docker.com/u/evarga/jenkins-slave/)
+* [jpetazzo/dind](https://registry.hub.docker.com/u/jpetazzo/dind/)
 
 ## Requirements
 
 * The container must be run with `--privileged` in order for nested-Docker to work. There is a check box to enable this for the image within the Jenkins UI.
 
-## Instructions
+## Running
 
-I have a write-up of how to use Docker containers as build slaves within Jenkins at: http://dantehranian.wordpress.com/2014/09/08/docker-jenkins-dynamically-provisioning-sles-11-build-containers/
+To run a Docker container
 
-Once your Jenkins slave is up and running, you can run `docker` commands like `docker build`, `docker pull`, and `docker push` from within the Docker build slave container.
+```bash
+docker run -it --rm -e "JENKINS_SLAVE_SSH_PUBKEY=$(cat ~/.ssh/id_rsa.pub)" --privileged -p 2222:22 shiftleft/dind-jenkins-slave
+```
 
-## Misc References
+```bash
+$ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 2222 jenkins@localhost
+$ docker run -it --rm hello-world
+```
 
-* https://blog.docker.com/2013/09/docker-can-now-run-within-docker/
+### How to use this image with Docker Plugin
+
+To use this image with [Docker Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin), you need to
+pass the public SSH key using environment variable `JENKINS_SLAVE_SSH_PUBKEY` and not as a startup argument.
+
+In _Environment_ field of the Docker Template (advanced section), just add:
+
+    JENKINS_SLAVE_SSH_PUBKEY=<YOUR PUBLIC SSH KEY HERE>
+
+Don't put quotes around the public key. You should be all set.
